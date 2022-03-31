@@ -80,10 +80,10 @@ export async function main(ns) {
         let stocks = [];
         for (let i = 0; i < symbols.length; i++) {
             let symbol = symbols[i];
-            let position = ns.stock.getPosition(symbols[i]);
+            let position = ns.stock.getPosition(symbol);
             let forecast = ns.stock.getForecast(symbol);
             let volatility = ns.stock.getVolatility(symbol);
-            var askPrice = ns.stock.getAskPrice(stock);
+            var askPrice = ns.stock.getAskPrice(symbol);
 
             if (position[0] > 0) {
                 stocks.push({
