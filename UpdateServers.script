@@ -1,0 +1,83 @@
+var servers = getPurchasedServers();
+var hacked = JSON.parse(peek(2));
+tprint(hacked);
+tprint("Got all hacked servers");
+
+for (var y = 0; y < servers.length; y++) {
+	scp("Hack.script", "home", servers[y]);
+
+	var counter = 0;
+	var totalThreads = Math.floor(getServerMaxRam(servers[y]) / getScriptRam("Hack.script"));
+	var remainder = totalThreads % hacked.length;
+	var maxThreads = Math.floor(totalThreads / hacked.length);
+
+	tprint(servers[y] + ": Max Ram: " + getServerMaxRam(servers[y]) + ", Max Threads: " + maxThreads + ", Script Ram usage: " + getScriptRam("Hack.script") + ", remainder: " + remainder);
+
+	exec("Hack.script", servers[y], maxThreads + remainder, hacked[0].name);
+	for (var x = 1; x < hacked.length; x++) {
+		exec("Hack.script", servers[y], maxThreads, hacked[x].name);
+	}
+}
+
+for (var y = 0; y < hacked.length; y++) {
+	scp("Hack.script", "home", hacked[y].name);
+	exec("Hack.script", hacked[y].name, 1, hacked[y].name);
+
+	for (var x = 0; x < hacked.length; x++) {
+		var server = hacked[x].name;
+		if (getServerMaxRam(hacked[y].name) - getServerUsedRam(hacked[y].name) >= getScriptRam("Hack.script") && server !== hacked[y].name) {
+			exec("Hack.script", hacked[y].name, 1, server);
+		}
+	}
+}
+
+
+function GetSortedByValueServer() {
+	var list = JSON.parse(peek(2));
+	var finalList = [];
+	for (var x = 0; x < list.length; x++) {
+		var server = list[x].split(':');
+		finalList.push({ name: server[0], value: server[1] });
+	}
+
+	return mergeSort(finalList);;
+}
+
+function mergeSort(unsortedArray) {
+	// No need to sort the array if the array only has one element or empty
+	if (unsortedArray.length <= 1) {
+		return unsortedArray;
+	}
+	// In order to divide the array in half, we need to figure out the middle
+	var middle = Math.floor(unsortedArray.length / 2);
+
+	// This is where we will be dividing the array into left and right
+	var left = unsortedArray.slice(0, middle);
+	var right = unsortedArray.slice(middle);
+
+	// Using recursion to combine the left and right
+	return merge(
+		mergeSort(left), mergeSort(right)
+	);
+}
+
+function merge(left, right) {
+	var resultArray = [], leftIndex = 0, rightIndex = 0;
+
+	// We will concatenate values into the resultArray in order
+	while (leftIndex < left.length && rightIndex < right.length) {
+		if (left[leftIndex].value > right[rightIndex].value) {
+			resultArray.push(left[leftIndex]);
+			leftIndex++; // move left array cursor
+		} else {
+			resultArray.push(right[rightIndex]);
+			rightIndex++; // move right array cursor
+		}
+	}
+
+	// We need to concat here because there will be one element remaining
+	// from either left OR the right
+	return resultArray
+		.concat(left.slice(leftIndex))
+		.concat(right.slice(rightIndex));
+}

@@ -1,0 +1,18 @@
+var SERVERNAME = args[0];
+var nodeWeakenFloor = getServerMinSecurityLevel(SERVERNAME);
+var nodeMaxMoneyAvailable = getServerMaxMoney(SERVERNAME);
+
+while (true) {
+	var currentWeakenLevel = getServerSecurityLevel(SERVERNAME);
+	var nodeMoneyAvailable = getServerMoneyAvailable(SERVERNAME);
+
+	if (currentWeakenLevel > nodeWeakenFloor * 1.05) {
+		weaken(SERVERNAME);
+	}
+	else if (nodeMoneyAvailable < nodeMaxMoneyAvailable * .85) {
+		grow(SERVERNAME);
+	}
+	else {
+		hack(SERVERNAME);
+	}
+}

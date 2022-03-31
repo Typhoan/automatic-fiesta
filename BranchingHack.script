@@ -1,0 +1,153 @@
+var hackedServers = [];
+var serverSet = []
+serverSet.push("home");
+serverSet.push("darkweb");
+var currentHackLevel = getHackingLevel();
+
+while (true) {
+	if (getHackingLevel() - currentHackLevel > 10) {
+		var network = scan();
+		currentHackLevel = getHackingLevel();
+
+		while (network[network.length - 1] != null) {
+			var server = network.pop();
+			tprint("processing: " + server);
+			//remove owned servers and previously seen servers
+			if (!server.includes("HackBot") && !serverSet.includes(server)) {
+
+				// check if you already have root
+				if (hasRootAccess(server)) {
+					hackedServers.push({ name: server, value: EstimateIncome(server) });
+					serverSet.push(server);
+
+					tprint("Added " + server + " To existing hacked list");
+					GetNearByNodes(server);
+				}
+				else {
+					//check if you can hack it
+					if (getServerRequiredHackingLevel(server) <= getHackingLevel()) {
+						tprint("Attempting to hack: " + server);
+						OpenPorts(server)
+
+						hackedServers.push({ name: server, value: EstimateIncome(server) });
+						serverSet.push(server);
+						print("Hacked: " + server);
+						GetNearByNodes(server);
+					}
+					else {
+						tprint("Missing reqs to hack: " + server);
+					}
+				}
+			}
+		}
+
+		SaveData();
+		RunScripts();
+	}
+	else {
+		sleep(1000 * 60 * 30);
+	}
+}
+
+function RunScripts() {
+	kill("purchaseServers.script", "home");
+	exec("killSwitch.script", "home", 1);
+	sleep(10000);
+
+	exec("purchaseServers.script", "home", 1);
+	exec("UpdateServers.script", "home", 1);
+}
+
+function SaveData() {
+	var sorted = mergeSort(hackedServers);
+	tprint("Completed network scan");
+	tprint(JSON.stringify(sorted));
+	clearPort(1);
+	clearPort(2);
+	writePort(1, JSON.stringify(serverSet));
+	writePort(2, JSON.stringify(sorted));
+}
+
+function GetNearByNodes(serverName) {
+	var nearByServers = scan(serverName);
+	for (var x = 0; x < nearByServers.length; x++) {
+		if (!serverSet.includes(nearByServers[x])) {
+			network.push(nearByServers[x]);
+		}
+	}
+}
+
+function OpenPorts(serverName) {
+	var portsToOpen = getServerNumPortsRequired(serverName);
+
+	for (var x = portsToOpen; x >= 0; x--) {
+		if (x === 0) {
+			nuke(serverName);
+		}
+		else if (x === 1 && fileExists("BruteSSH.exe")) {
+			brutessh(serverName);
+		}
+		else if (x === 2 && fileExists("FTPCrack.exe")) {
+			ftpcrack(serverName);
+		}
+		else if (x === 3 && fileExists("HTTPWorm.exe")) {
+			httpworm(serverName);
+		}
+		else if (x === 4 && fileExists("SQLInject.exe")) {
+			sqlinject(serverName);
+		}
+		else if (x === 5 && fileExists("relaySMTP.exe")) {
+			relaysmtp(serverName);
+		}
+	}
+}
+
+function EstimateIncome(serverName) {
+	var estimatedTimeDifference = 4;
+	var percentOfGrowth = .8;
+	var miliToSec = 1000;
+	var estimatedMaxCash = getServerMaxMoney(serverName) * percentOfGrowth;
+	var securityRatio = getServerMinSecurityLevel(serverName) / getServerSecurityLevel(serverName);
+	var estimatedWeakenTime = getWeakenTime(serverName) * (securityRatio);
+
+	return estimatedMaxCash / (estimatedWeakenTime / (miliToSec * estimatedTimeDifference));
+}
+
+function mergeSort(unsortedArray) {
+	// No need to sort the array if the array only has one element or empty
+	if (unsortedArray.length <= 1) {
+		return unsortedArray;
+	}
+	// In order to divide the array in half, we need to figure out the middle
+	var middle = Math.floor(unsortedArray.length / 2);
+
+	// This is where we will be dividing the array into left and right
+	var left = unsortedArray.slice(0, middle);
+	var right = unsortedArray.slice(middle);
+
+	// Using recursion to combine the left and right
+	return merge(
+		mergeSort(left), mergeSort(right)
+	);
+}
+
+function merge(left, right) {
+	var resultArray = [], leftIndex = 0, rightIndex = 0;
+
+	// We will concatenate values into the resultArray in order
+	while (leftIndex < left.length && rightIndex < right.length) {
+		if (left[leftIndex].value > right[rightIndex].value) {
+			resultArray.push(left[leftIndex]);
+			leftIndex++; // move left array cursor
+		} else {
+			resultArray.push(right[rightIndex]);
+			rightIndex++; // move right array cursor
+		}
+	}
+
+	// We need to concat here because there will be one element remaining
+	// from either left OR the right
+	return resultArray
+		.concat(left.slice(leftIndex))
+		.concat(right.slice(rightIndex));
+}

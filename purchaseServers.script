@@ -1,0 +1,27 @@
+var servers = JSON.parse(peek(2));
+var counter = getPurchasedServers().length;
+var basePower = 11 + Math.floor(counter / 2);
+
+while (true) {
+    var server = purchaseServer("HackBot-", Math.pow(2, basePower));
+    if (server !== "") {
+        tprint("Purchased server: " + server);
+        scp("Hack.script", "home", server);
+        tprint("Successfully copied file");
+        var totalThreads = Math.floor(getServerMaxRam(server) / getScriptRam("Hack.script"));
+        var remainder = totalThreads % servers.length;
+        var maxThreads = Math.floor(totalThreads / servers.length);
+
+        exec("Hack.script", server, maxThreads + remainder, servers[0].name);
+        for (var x = 1; x < servers.length; x++) {
+            exec("Hack.script", server, maxThreads, servers[x].name);
+        }
+        counter++;
+        if (counter % 4 == 0) {
+            basePower++;
+        }
+    }
+    else {
+        sleep(36000);
+    }
+}

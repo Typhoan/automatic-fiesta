@@ -1,0 +1,11 @@
+var servers = getPurchasedServers();
+var hacked = JSON.parse(peek(1));
+
+for (var x = 0; x < servers.length; x++) {
+	killall(servers[x]);
+}
+
+for (var x = 0; x < hacked.length; x++) {
+	if(!hacked[x].includes("home") && !hacked[x].includes("darkweb"))
+	killall(hacked[x]);
+}
