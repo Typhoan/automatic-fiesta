@@ -40,7 +40,7 @@ async function MapNetwork(ns) {
 				if (ns.getServerMaxMoney(server) != 0) {
 					hackedServers.push({ name: server, value: EstimateIncome(ns, server) });
 				}
-				
+
 				serverSet.push(server);
 
 				ns.print("Added " + server + " To existing hacked list");
@@ -55,7 +55,7 @@ async function MapNetwork(ns) {
 							hackedServers.push({ name: server, value: EstimateIncome(ns, server) });
 						}
 						ns.print("Hacked: " + server);
-						
+
 					}
 					GetNearByNodes(ns, server);
 					serverSet.push(server);
@@ -110,7 +110,7 @@ function OpenPorts(ns, serverName) {
 		ns.brutessh(serverName);
 		openPorts++;
 	}
-	else if(server.sshPortOpen){
+	else if (server.sshPortOpen) {
 		openPorts++;
 	}
 
@@ -118,7 +118,7 @@ function OpenPorts(ns, serverName) {
 		ns.sqlinject(serverName);
 		openPorts++;
 	}
-	else if(server.sqlPortOpen){
+	else if (server.sqlPortOpen) {
 		openPorts++;
 	}
 
@@ -126,7 +126,7 @@ function OpenPorts(ns, serverName) {
 		ns.relaysmtp(serverName);
 		openPorts++;
 	}
-	else if(server.smtpPortOpen){
+	else if (server.smtpPortOpen) {
 		openPorts++;
 	}
 
@@ -134,7 +134,7 @@ function OpenPorts(ns, serverName) {
 		ns.httpworm(serverName);
 		openPorts++;
 	}
-	else if(server.httpPortOpen){
+	else if (server.httpPortOpen) {
 		openPorts++;
 	}
 
@@ -142,12 +142,18 @@ function OpenPorts(ns, serverName) {
 		ns.ftpcrack(serverName);
 		openPorts++;
 	}
-	else if(server.ftpPortOpen){
+	else if (server.ftpPortOpen) {
 		openPorts++;
 	}
 
 	if (server.numOpenPortsRequired <= openPorts) {
 		ns.nuke(serverName);
+		var sourceFiles = ns.getOwnedSourceFiles();
+		if (sourceFiles.filter(e => e.n === 4).length > 0) {
+			if (!server.backdoorInstalled && (server.hostname === 'avmnite-02h' || server.hostname === 'I.I.I.I' || server.hostname === 'run4theh111z' || server.hostname === 'CSEC' || server.hostname === 'w0r1d_d43m0n')){
+				await ns.installBackdoor();
+			}
+		}
 		return true;
 	}
 

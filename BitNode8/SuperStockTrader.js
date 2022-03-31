@@ -11,16 +11,35 @@
  *  
  */
 
-
-
-
 /** @param {NS} ns **/
 export async function main(ns) {
+    const args = ns.flags([["help", false]]);
+    if (args.help) {
+        ns.tprint("This script will find the best stock to buy long or short.");
+        ns.tprint("Optional Arguments:");
+        ns.tprint("  MoneyToReserve, The amount of money to keep on the player. 1B by default.");
+        ns.tprint(`Usage: run ${ns.getScriptName()} [MoneyToReserve]`);
+        ns.tprint("Example:");
+        ns.tprint(`> run ${ns.getScriptName()} 1000000000`);
+        return;
+    }
+
     var maxSharePer = 1.00
-    var stockBuyPer = 0.70
+    var stockBuyPer = 0.65
     var stockVolPer = 0.05
-    var moneyKeep = 1000000000
+    var moneyKeep = 0
     var minSharePer = 5
+
+    if(args[0] == null){
+        moneyKeep = 1000000000
+    }
+    else if(typeof(args[0] != "number")){
+        ns.tprint("Invalid option argument");
+        return;
+    } 
+    else if(args[0]){
+        moneyKeep = args[0];
+    }
 
     while (true) {
         ns.disableLog('disableLog');
@@ -46,13 +65,13 @@ export async function main(ns) {
 
         if (forecast >= stockBuyPer && volPer <= stockVolPer) {
             if (stock.orderType === "long") {
-                if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock, minSharePer, "Long")) {
+                if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock.symbol, minSharePer, "Long")) {
                     var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
                     ns.stock.buy(stock.symbol, shares);
                 }
             }
             else if (stock.orderType === "short") {
-                if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock, minSharePer, "Short")) {
+                if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock.symbol, minSharePer, "Short")) {
                     var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
                     ns.stock.short(stock.symbol, shares);
                 }
@@ -63,10 +82,10 @@ export async function main(ns) {
     function sellPositions(stock) {
         if (stock.forecast < 0.5) {
             if (stock.orderType === "long") {
-                ns.stock.sell(stock, stock.position);
+                ns.stock.sell(stock.symbol, stock.position);
             }
             else {
-                ns.stock.sellShort(stock, stock.position);
+                ns.stock.sellShort(stock.symbol, stock.position);
             }
         }
     }
@@ -95,10 +114,10 @@ export async function main(ns) {
                     askPrice: askPrice
                 });
             }
-            else if (position[3] > 0) {
+            else if (position[2] > 0) {
                 stocks.push({
                     symbol: symbol,
-                    position: position[3],
+                    position: position[2],
                     orderType: "short",
                     forecast: 1 - forecast,
                     volatility: volatility,
@@ -110,17 +129,8 @@ export async function main(ns) {
                     stocks.push({
                         symbol: symbol,
                         position: 0,
-                        orderType: "long",
-                        forecast: forecast,
-                        volatility: volatility,
-                        askPrice: askPrice
-                    });
-                } else {
-                    stocks.push({
-                        symbol: symbol,
-                        position: 0,
-                        orderType: "short",
-                        forecast: 1 - forecast,
+                        orderType: forecast >= .5 ? "long": "short",
+                        forecast: forecast >= .5 ? forecast : 1 - forecast,
                         volatility: volatility,
                         askPrice: askPrice
                     });
@@ -128,6 +138,6 @@ export async function main(ns) {
             }
         }
 
-        return stocks.sort(function (a, b) { return a.forecast - b.forecast; });
+        return stocks.sort(function (a, b) { return b.forecast - a.forecast; });
     }
 }
