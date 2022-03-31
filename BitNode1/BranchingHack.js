@@ -19,14 +19,14 @@ export async function main(ns) {
 
 	while (true) {
 		if (ns.getHackingLevel() < 10 || ns.getHackingLevel() - hackingLevel > 10) {
-			await MapNetworkMap(ns);
+			await MapNetwork(ns);
 			hackingLevel = ns.getHackingLevel();
 		}
 		await ns.sleep(1000 * 60 * 5);
 	}
 }
 
-async function MapNetworkMap(ns) {
+async function MapNetwork(ns) {
 	network = ns.scan();
 	while (network[network.length - 1] != null) {
 		var server = network.pop();
@@ -74,12 +74,12 @@ async function MapNetworkMap(ns) {
 }
 
 async function RunScripts(ns) {
-	ns.kill("/AutoUpdates/PurchaseServers.js", "home");
-	ns.kill("/AutoUpdates/Dispatcher.js", "home");
-	await ns.exec("/AutoUpdates/KillSwitch.js", "home", 1);
-	await ns.exec("/AutoUpdates/PurchaseServers.js", "home", 1);
-	await ns.exec("/AutoUpdates/UpdateServers.js", "home", 1);
-	await ns.exec("/AutoUpdates/Dispatcher.js", "home", 1);
+	ns.kill("/BitNode1/PurchaseServers.js", "home");
+	ns.kill("/BitNode1/Dispatcher.js", "home");
+	await ns.exec("/BitNode1/KillSwitch.js", "home", 1);
+	await ns.exec("/BitNode1/PurchaseServers.js", "home", 1);
+	await ns.exec("/BitNode1/UpdateServers.js", "home", 1);
+	await ns.exec("/BitNode1/Dispatcher.js", "home", 1);
 }
 
 async function SaveData(ns) {

@@ -14,7 +14,7 @@ export async function main(ns) {
 
 	while (true) {
 		if (ns.getHackingLevel() < 10 || ns.getHackingLevel() - hackingLevel > 10) {
-			await MapNetworkMap(ns);
+			await MapNetwork(ns);
 			await SetUpPurchasedServers(ns);
 			hackingLevel = ns.getHackingLevel();
 		}
@@ -23,7 +23,7 @@ export async function main(ns) {
 	}
 }
 
-async function MapNetworkMap(ns) {
+async function MapNetwork(ns) {
 	network = ns.scan();
 	while (network[network.length - 1] != null) {
 		var server = network.pop();
@@ -63,8 +63,14 @@ async function MapNetworkMap(ns) {
 	}
 
 	await SaveData(ns);
-
+	await RunScripts(ns);
 }
+
+async function RunScripts(ns) {
+	ns.kill("/BitNode8/Dispatcher.js", "home");
+	await ns.exec("/BitNode8/Dispatcher.js", "home", 1);
+}
+
 
 async function CopyScriptsToServer(ns, serverName) {
 	await ns.scp("/HackScripts/Hack.js", "home", serverName);

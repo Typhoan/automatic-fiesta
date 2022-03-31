@@ -12,13 +12,6 @@ export async function main(ns) {
     await displayStats(ns);
 }
 
-export function inject(ns, code) {
-    let id = '' + Math.random() + Math.random();
-    let output = `<div id="${id}" style="position:absolute; width: 100%; height:100%"`;
-    output += ` onmouseover="${code} document.getElementById('${id}').remove();"></div>`
-    ns.print(output);
-}
-
 function format(value) {
     const prefixes = ["", "k", "m", "b", "t", "q"];
     for (let i = 0; i < prefixes.length; i++) {
