@@ -62,13 +62,12 @@ export async function main(ns) {
 
     function sellPositions(stock) {
         if (stock.forecast < 0.5) {
-            if(stock.orderType === "long") {
-            ns.stock.sell(stock, stock.position);
+            if (stock.orderType === "long") {
+                ns.stock.sell(stock, stock.position);
             }
-            else{
+            else {
                 ns.stock.sellShort(stock, stock.position);
             }
-            //ns.print('Sold: '+ stock + '')
         }
     }
 
@@ -132,5 +131,3 @@ export async function main(ns) {
         return stocks.sort(function (a, b) { return a.forecast - b.forecast; });
     }
 }
-}
-
