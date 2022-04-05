@@ -7,6 +7,8 @@ export async function main(ns) {
     let hasHTTPWorm = ns.fileExists('HTTPWorm.exe', 'home');
     let hasSQLInject = ns.fileExists('SQLInject.exe', 'home');
 
+    var sourceFiles = ns.getOwnedSourceFiles();
+    
     if (sourceFiles.filter(e => e.n === 4).length > 0) {
         while (!hasTor || !hasBrute || !hasFTPCrack || !hasRelaySMTP || !hasHTTPWorm || !hasSQLInject) 
         {

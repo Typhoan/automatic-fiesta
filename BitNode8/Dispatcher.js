@@ -74,9 +74,13 @@ function DispatchHacked(ns, shouldShare) {
 		var availableRam = ns.getServerMaxRam(serverName) - ns.getServerUsedRam(serverName);
 
 		var totalThreads = Math.floor(availableRam / ns.getScriptRam("/HackScripts/Weaken.js"));
+
+		while (numberServers > totalThreads){
+			numberServers--;
+		}
 		var maxThreads = Math.floor(totalThreads / numberServers);
 
-		for (var y = 0; y < endedScripts.length; y++) {
+		for (var y = 0; y < numberServers; y++) {
 			var targetServer = endedScripts[y];
 			ns.print("___________" + targetServer + "___________");
 			DetermineActions(ns, serverName, targetServer, maxThreads, shouldShare)
@@ -127,7 +131,7 @@ function DetermineActions(ns, serverName, targetServer, numberOfThreads, shouldS
 		totalActionsAvailable -= weakenActions;
 	}
 
-	if (isBelowGrowthThreshold) {
+	if (isBelowGrowthThreshold) { 
 		var targetMoney = 1 / percentMoneyAvailable;
 		var executionsToGrow = Math.ceil((ns.growthAnalyze(targetServer, targetMoney)) * 1.1);
 		var extraWeakensNeeded = Math.ceil(ns.growthAnalyzeSecurity(executionsToGrow));

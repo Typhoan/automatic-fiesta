@@ -104,7 +104,7 @@ export async function main(ns) {
 				} else {
 					ns.print(`${sym} (${ratio}): ${format(profit + cost)} / ${format(profit)} (${Math.round(profit / cost * 10000) / 100}%)`);
 				}
-			} else if (shortShares > 0) {
+			} /**else if (shortShares > 0) {
 				const cost = shortShares * shortPrice;
 				const profit = shortShares * (shortPrice - askPrice) - 2 * commission;
 				totalInvested += cost;
@@ -117,19 +117,19 @@ export async function main(ns) {
 				} else {
 					ns.print(`${sym} (${ratio}): ${format(profit + cost)} / ${format(profit)} (${Math.round(profit / cost * 10000) / 100}%)`);
 				}
-			} else {
-				const money = ns.getServerMoneyAvailable("home")-100000000;
+			} */else {
+				const money = ns.getServerMoneyAvailable("home");
 				if (state > 0) {
 					const sharesToBuy = Math.min(50000, ns.stock.getMaxShares(sym), Math.floor((money - commission) / askPrice));
 					if (ns.stock.buy(sym, sharesToBuy) > 0) {
 						ns.print(`BOUGHT (long) ${sym}.`);
 					}
-				} else if (state < 0) {
-					const sharesToBuy = Math.min(50000, ns.stock.getMaxShares(sym), Math.floor((money - commission) / bidPrice));
-					if (ns.stock.short(sym, sharesToBuy) > 0) {
-						ns.print(`BOUGHT (short) ${sym}.`);
-					}
-				}
+				} //else if (state < 0) {
+				//	const sharesToBuy = Math.min(50000, ns.stock.getMaxShares(sym), Math.floor((money - commission) / bidPrice));
+				//	if (ns.stock.short(sym, sharesToBuy) > 0) {
+				//		ns.print(`BOUGHT (short) ${sym}.`);
+				//	}
+				//}
 			}
 		}
 

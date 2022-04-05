@@ -151,7 +151,7 @@ function OpenPorts(ns, serverName) {
 		var sourceFiles = ns.getOwnedSourceFiles();
 		if (sourceFiles.filter(e => e.n === 4).length > 0) {
 			if (!server.backdoorInstalled && (server.hostname === 'avmnite-02h' || server.hostname === 'I.I.I.I' || server.hostname === 'run4theh111z' || server.hostname === 'CSEC' || server.hostname === 'w0r1d_d43m0n')){
-				await ns.installBackdoor();
+				ns.installBackdoor();
 			}
 		}
 		return true;

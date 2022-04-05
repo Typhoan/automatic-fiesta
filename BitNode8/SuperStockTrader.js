@@ -30,16 +30,23 @@ export async function main(ns) {
     var moneyKeep = 0
     var minSharePer = 5
 
-    if(args[0] == null){
+    if(ns.args[0] == null){
         moneyKeep = 1000000000
     }
-    else if(typeof(args[0] != "number")){
+    else if(typeof(ns.args[0]) != "number"){
         ns.tprint("Invalid option argument");
         return;
     } 
-    else if(args[0]){
+    else if(ns.args[0]){
         moneyKeep = args[0];
     }
+
+    ns.print("Starting up...");
+    ns.print("Max Share Percentage: " + maxSharePer);
+    ns.print("Stock Buy Percentage: " + stockBuyPer);
+    ns.print("Stock Volatility Percentage: " + stockVolPer);
+    ns.print("Money to keep: " + moneyKeep);
+    ns.print("Minimum Share Percentage: " + minSharePer);
 
     while (true) {
         ns.disableLog('disableLog');
@@ -66,15 +73,15 @@ export async function main(ns) {
         if (forecast >= stockBuyPer && volPer <= stockVolPer) {
             if (stock.orderType === "long") {
                 if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock.symbol, minSharePer, "Long")) {
-                    var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
+                    var shares = Math.min(Math.floor((playerMoney - moneyKeep - 100000) / askPrice), maxShares);
                     ns.stock.buy(stock.symbol, shares);
                 }
             }
             else if (stock.orderType === "short") {
-                if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock.symbol, minSharePer, "Short")) {
-                    var shares = Math.min((playerMoney - moneyKeep - 100000) / askPrice, maxShares);
-                    ns.stock.short(stock.symbol, shares);
-                }
+               // if (playerMoney - moneyKeep > ns.stock.getPurchaseCost(stock.symbol, minSharePer, "Short")) {
+               //     var shares = Math.min(Math.floor((playerMoney - moneyKeep - 100000) / askPrice), maxShares);
+               //     ns.stock.short(stock.symbol, shares);
+               // }
             }
         }
     }
@@ -115,14 +122,14 @@ export async function main(ns) {
                 });
             }
             else if (position[2] > 0) {
-                stocks.push({
-                    symbol: symbol,
-                    position: position[2],
-                    orderType: "short",
-                    forecast: 1 - forecast,
-                    volatility: volatility,
-                    askPrice: askPrice
-                });
+                //stocks.push({
+                //    symbol: symbol,
+                //    position: position[2],
+                //    orderType: "short",
+                //    forecast: 1 - forecast,
+                //    volatility: volatility,
+                //    askPrice: askPrice
+               // });
             }
             else {
                 if (forecast >= .5) {
