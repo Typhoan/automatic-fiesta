@@ -1,7 +1,8 @@
 /** 
  * returns list of servers that are in order of value;
- * @param {NS} ns
- * @param {string} serverName
+ * @param {NS} ns - namespace
+ * @param {Array<Server>} serverName - list of servers to sort
+ * @returns {Array<Server>} - list of servers in order of value
  **/
 export async function getMostProfitableServers(ns, hackedServers){
     let mostProfitableServers = [];
