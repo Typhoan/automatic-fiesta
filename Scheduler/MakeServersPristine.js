@@ -1,4 +1,4 @@
-import {getMaxThreads, areServerScriptsRunning} from "helpers.js"
+import {getMaxThreads, areServerScriptsRunning} from "/helpers.js"
 
 let ns; 
 
@@ -40,7 +40,7 @@ function processServer(hackedServers, x, agentServers, pristineServers) {
 
     if (!pristineServers.includes(server)) {
         if (!areServerScriptsRunning(ns, server, target, "/HackScripts/Weaken.js","/HackScripts/Grow.js", "/HackScripts/Hack.js", "/HackScripts/Share.js")) {
-            var totalThreads = getMaxThreads(server, ns.getScriptRam("/SchedulerScripts/Weaken.js"));
+            var totalThreads = getMaxThreads(ns, server, ns.getScriptRam("/SchedulerScripts/Weaken.js"));
 
             if (weakenAndGrowServer(server.hostname, target.hostname, totalThreads, .9, .9)) {
                 pristineServers.push(server);

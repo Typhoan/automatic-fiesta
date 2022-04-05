@@ -1,11 +1,11 @@
-import { getOwnedServers } from "../helpers.js";
-import { makeHackedServersPristine } from "./MakeServersPristine.js";
-import { getMostProfitableServers } from "./getMostProfitableServers.js";
-import { schedule } from "./Scheduler.js";
+import { getOwnedServers } from "/helpers.js";
+import { makeHackedServersPristine } from "/Scheduler/MakeServersPristine.js";
+import { getMostProfitableServers } from "/Scheduler/GetMostProfitableServers.js";
+import { schedule } from "/Scheduler/Scheduler.js";
 
 /** @param {NS} ns **/
 export async function main(ns) {
-    let ownedServers = getOwnedServers();
+    let ownedServers = getOwnedServers(ns);
 
     let hackedServers = ownedServers.filter(server => server.moneyMax > 0);
     let agentServers = ownedServers.filter(server => server.hostname.includes("HackBot") || server.hostname.includes("Home")).sort((a,b) => b.maxRam - a.maxRam);

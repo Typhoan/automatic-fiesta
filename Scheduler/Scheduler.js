@@ -1,4 +1,4 @@
-import { GetAvailableRam } from "helpers.js";
+import { getAvailableRam } from "/helpers.js";
 
 /**
  * 

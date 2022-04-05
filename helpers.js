@@ -50,7 +50,7 @@ export function format(value) {
  * @param {Server} server to calculate ram for
  * @returns {number}
  */
-export function GetAvailableRam(ns, server){
+export function getAvailableRam(ns, server){
   var availableRam;
   if (server.hostname == "home") {
     availableRam = (ns.getServerMaxRam(server.hostname) * .9) - ns.getServerUsedRam(server.hostname);
@@ -67,17 +67,12 @@ export function GetAvailableRam(ns, server){
  * @param {number} ramCost - The ram cost of the script.
  * @returns {Array<number>} - The max threads available to a server.
  */
-export function getMaxThreads(server, ...ramCosts) {
+export function getMaxThreads(ns, server, ...ramCosts) {
   if (ramCosts.length == 0) {
     throw new Error("No ram costs provided.");
   }
 
-  var availableRam;
-  if (server.hostname == "home") {
-    availableRam = (ns.getServerMaxRam(server.hostname) * .9) - ns.getServerUsedRam(server.hostname);
-  } else {
-    availableRam = ns.getServerMaxRam(server.hostname) - ns.getServerUsedRam(server.hostname);
-  }
+  var availableRam = GetAvailableRam(ns, server);
 
   var totalRam  = 0;
   for(let i = 0; i < ramCosts.length; i++) {
@@ -101,7 +96,7 @@ export function areServerScriptsRunning(ns, server, targetServer, ...scripts) {
 
   var isRunning = false;
   for (var x = 0; x < scripts.length; x++) {
-    isRunning = isRunning || ns.isServerRunningScripts(scripts[x], server.hostname, targetServer.hostname);
+    isRunning = isRunning || ns.scriptRunning(scripts[x], server.hostname);
   }
 
   return isRunning;
