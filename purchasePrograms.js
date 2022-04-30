@@ -9,7 +9,7 @@ export async function main(ns) {
 
     var sourceFiles = ns.getOwnedSourceFiles();
     
-    if (sourceFiles.filter(e => e.n === 4).length > 0) {
+   
         while (!hasTor || !hasBrute || !hasFTPCrack || !hasRelaySMTP || !hasHTTPWorm || !hasSQLInject) 
         {
             if(!hasTor && ns.getPlayer().money > 200000) {
@@ -44,5 +44,5 @@ export async function main(ns) {
             }
             await ns.sleep(15000);
         }
-    }
+    
 }

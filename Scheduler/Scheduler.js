@@ -9,44 +9,79 @@ import { getAvailableRam } from "/helpers.js";
  * @returns {Number} - The time the last scheduled event the server will execute in milliseconds.
  */
 
- export async function schedule(ns, targetServer, hostServer, LastScheduledTime) {
-    let availableRam = GetAvailableRam(ns, hostServer);
-    let scriptCost = ns.getScriptCost("/SchedulerScripts/Hack.js");
+export async function schedule(ns, targetServer, hostServer, LastScheduledTime) {
+    let availableRam = getAvailableRam(ns, hostServer);
+    let scriptCost = ns.getScriptRam("/SchedulerScripts/Hack.js");
+    let currentSecurityLevel = ns.getServerSecurityLevel(targetServer.hostname);
+    let minSecurityThreshhold = ns.getServerMinSecurityLevel(targetServer.hostname) * .9;
+    let maxCashThreshhold = targetServer.moneyMax * .9;
 
+    let growTime = ns.getGrowTime(targetServer.hostname);
+    let hackTime = ns.getHackTime(targetServer.hostname);
+    let weakenTime = ns.getWeakenTime(targetServer.hostname);
+
+    var hackActions = 0;
     var hackWeakenActions = 0;
-	var growthActions = 0;
+    var growthActions = 0;
     var growWeakenActions = 0;
-	
-    var amountMoneyHacked = hackAnalyze(targetServer.hostname);
-    var percentToGrowBy =  targetServer.moneyMax / (targetServer.moneyAvailable - amountMoneyHacked);
-    growthActions = ns.growthAnalyze(targetServer.hostname, percentToGrowBy);
 
-    var hackSecurityIncrease = ns.hackAnalyzeSecurity(1);
-    hackWeakenActions = hackSecurityIncrease / .05;
+    var amountMoneyHacked = ns.hackAnalyze(targetServer.hostname);
+    hackActions = Math.ceil((targetServer.moneyAvailable - maxCashThreshhold) / amountMoneyHacked);
+
+    if (targetServer.moneyAvailable - amountMoneyHacked < maxCashThreshhold) {
+        var percentToGrowBy = targetServer.moneyMax / (targetServer.moneyAvailable - (amountMoneyHacked*hackActions));
+        growthActions = Math.ceil(ns.growthAnalyze(targetServer.hostname, percentToGrowBy));
+    }
+
+    var hackSecurityIncrease = ns.hackAnalyzeSecurity(amountMoneyHacked*hackActions);
+    if(currentSecurityLevel - hackSecurityIncrease < minSecurityThreshhold) {
+        hackWeakenActions = Math.ceil(hackSecurityIncrease / .05);
+    }
 
     var growSecurityIncrease = ns.growthAnalyzeSecurity(growthActions);
-    growWeakenActions = growSecurityIncrease / .05;
+    if(currentSecurityLevel - hackSecurityIncrease - growSecurityIncrease < minSecurityThreshhold) {
+        growWeakenActions = Math.ceil(growSecurityIncrease / .05);
+    }
 
-    var totalActionRamCost = scriptCost * (hackWeakenActions + growWeakenActions +1);
+    var totalActionRamCost = scriptCost * (hackWeakenActions + growWeakenActions + 1);
 
     let offSetTime = 0;
     var startTime = new Date().getTime();
 
-    if(LastScheduledTime > 0){
+    if (LastScheduledTime > 0) {
         offSetTime = startTime - LastScheduledTime;
     }
 
-    while( totalActionCost <= availableRam){
+    ns.tprint("Growth time: " + growTime);
+    ns.tprint("Weaken time: " + weakenTime);
+    ns.tprint("Hack time: " + hackTime);
+
+    while (totalActionRamCost <= availableRam) {
         var schedule = calculateScheduleOffsets(ns, targetServer.hostname, growTime, hackTime, weakenTime, offSetTime);
         offSetTime = schedule.Offset;
         availableRam -= totalActionRamCost;
-        await ns.runScript("/SchedulerScripts/Hack.js",   hostServer.hostname, 1,                   schedule.Target.hostname, schedule.HackSleep);
-        await ns.runScript("/SchedulerScripts/Weaken.js", hostServer.hostname, hackWeakenActions,   schedule.Target.hostname, schedule.HackWeakenSleep);
-        await ns.runScript("/SchedulerScripts/Grow.js",   hostServer.hostname, growthActions,       schedule.Target.hostname, schedule.GrowSleep);
-        await ns.runScript("/SchedulerScripts/Weaken.js", hostServer.hostname, growWeakenActions,   schedule.Target.hostname, schedule.GrowWeakenSleep);
+        if(hackActions > 0){
+            await ns.exec("/SchedulerScripts/Hack.js", hostServer.hostname, hackActions, schedule.Target, schedule.HackSleep);
+        }
+
+        if(hackWeakenActions > 0)
+        {
+            await ns.exec("/SchedulerScripts/Weaken.js", hostServer.hostname, hackWeakenActions, schedule.Target, schedule.HackWeakenSleep);
+        }
+
+        if(growthActions > 0)
+        {
+            await ns.exec("/SchedulerScripts/Grow.js", hostServer.hostname, growthActions, schedule.Target, schedule.GrowSleep);
+        }
+
+        if(growWeakenActions > 0)
+        {
+            await ns.exec("/SchedulerScripts/Weaken.js", hostServer.hostname, growWeakenActions, schedule.Target, schedule.GrowWeakenSleep);
+        }
+        await ns.sleep(10000);
     }
 
-    return startTime + offSetTime + schedule.weakenTime;
+    return startTime + offSetTime + weakenTime;
 }
 
 /**
@@ -67,5 +102,5 @@ function calculateScheduleOffsets(ns, target, growTime, hackTime, weakenTime, of
         growWeakenSleep += 50;
     }
 
-    return { Target: target, growSleep: growSleep, growWeakenSleep: growWeakenSleep, hackSleep: hackSleep, hackWeakenSleep: hackWeakenSleep, Offset: offset + 100 };
+    return { Target: target, GrowSleep: growSleep, GrowWeakenSleep: growWeakenSleep, HackSleep: hackSleep, HackWeakenSleep: hackWeakenSleep, Offset: offset + 100 };
 }

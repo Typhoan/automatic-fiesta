@@ -8,7 +8,7 @@ export async function getMostProfitableServers(ns, hackedServers){
     let mostProfitableServers = [];
 
     for (let i = 0; i < hackedServers.length; i++) {
-        mostProfitableServers.push({Server: hackedServers[i], EstimatedIncome:EstimateIncome(ns, hackedServers[i].name)});
+        mostProfitableServers.push({Server: hackedServers[i], EstimatedIncome:EstimateIncome(ns, hackedServers[i].hostname)});
     }
 
 
@@ -17,7 +17,7 @@ export async function getMostProfitableServers(ns, hackedServers){
 
 
 function EstimateIncome(ns, serverName) {
-	let estimatedMaxCash = ns.getServerMaxMoney(serverName) * percentOfGrowth;
+	let estimatedMaxCash = ns.getServerMaxMoney(serverName) * .9;
 	let estimatedWeakenTime = ns.getWeakenTime(serverName);
 
 	return estimatedMaxCash / (estimatedWeakenTime / 4000);

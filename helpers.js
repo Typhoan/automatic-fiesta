@@ -72,7 +72,7 @@ export function getMaxThreads(ns, server, ...ramCosts) {
     throw new Error("No ram costs provided.");
   }
 
-  var availableRam = GetAvailableRam(ns, server);
+  var availableRam = getAvailableRam(ns, server);
 
   var totalRam  = 0;
   for(let i = 0; i < ramCosts.length; i++) {

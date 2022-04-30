@@ -1,7 +1,7 @@
-let serverSet;
-let hacked;
-let network;
-let hackingLevel;
+var serverSet;
+var hacked;
+var network;
+var hackingLevel;
 
 /** @param {NS} ns **/
 export async function main(ns) {
@@ -28,12 +28,12 @@ async function MapNetwork(ns) {
 	while (network[network.length - 1] != null) {
 		var server = network.pop();
 		ns.print("processing: " + server);
-
 		//remove owned servers and previously seen servers
 		if (!server.includes("HackBot") && !serverSet.includes(server)) {
 
 			// check if you already have root
 			if (ns.hasRootAccess(server)) {
+				await OpenPorts(ns, server);
 				hacked.push(server);
 				serverSet.push(server);
 
@@ -45,7 +45,7 @@ async function MapNetwork(ns) {
 				//check if you can hack it
 				if (ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()) {
 					ns.print("Attempting to hack: " + server);
-					if (OpenPorts(ns, server)) {
+					if (await OpenPorts(ns, server)) {
 						hacked.push(server);
 						ns.print("Hacked: " + server);
 
@@ -96,7 +96,7 @@ function GetNearByNodes(ns, serverName) {
 	}
 }
 
-function OpenPorts(ns, serverName) {
+async function OpenPorts(ns, serverName) {
 
 	var server = ns.getServer(serverName);
 	var openPorts = 0;
@@ -142,16 +142,22 @@ function OpenPorts(ns, serverName) {
 
 	if (server.numOpenPortsRequired <= openPorts) {
 		ns.nuke(serverName);
-		var sourceFiles = ns.getOwnedSourceFiles();
-		if (sourceFiles.filter(e => e.n === 4).length > 0) {
-			if (!server.backdoorInstalled && (server.hostname === 'avmnite-02h' || server.hostname === 'I.I.I.I' || server.hostname === 'run4theh111z' || server.hostname === 'CSEC' || server.hostname === 'w0r1d_d43m0n')){
-				ns.installBackdoor();
-			}
-		}
 		return true;
 	}
 
+	//var sourceFiles = ns.getOwnedSourceFiles();
+		//if (sourceFiles.filter(e => e.n === 4).length > 0) {
+			Backdoor(ns, server)
+		//}
+
 	return false;
+}
+
+async function Backdoor(ns, server){
+	if (server.hasAdminRights && !server.backdoorInstalled && (server.hostname === 'avmnite-02h' || server.hostname === 'I.I.I.I' || server.hostname === 'run4theh111z' || server.hostname === 'CSEC' || server.hostname === 'w0r1d_d43m0n')){
+		ns.toast("Backdoored - " + server.hostname, "success", 2000);
+		await ns.installBackdoor();
+	}
 }
 
 async function SaveData(ns) {

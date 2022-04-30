@@ -1,6 +1,6 @@
-import {getMaxThreads, areServerScriptsRunning} from "/helpers.js"
+import { getMaxThreads, areServerScriptsRunning } from "/helpers.js"
 
-let ns; 
+let ns;
 
 /** 
  * Makes all hacked servers pristine.
@@ -10,20 +10,16 @@ let ns;
  * **/
 export async function makeHackedServersPristine(NS, hackedServers, agentServers) {
     ns = NS;;
-    let pristineServers = [];
+    var pristineServers = [];
 
+    var counter = 0;
     while (pristineServers.length != hackedServers.length) {
-        if (hackedServers.length <= agentServers.length) {
-            for (var x = 0; x < hackedServers.length; x++) {
-                processServer(hackedServers, x, agentServers, pristineServers, ns);
-            }
-        }
-        else if(hackedServers.length > agentServers.length){
-            for (var x = 0; x < agentServers.length; x++) {
-                processServer(hackedServers, x, agentServers, pristineServers, ns);
-            }
-        }
-        await ns.sleep(60000);
+
+        ns.tprint(pristineServers.length + " / " + hackedServers.length);
+        processServer(hackedServers, agentServers, pristineServers, ns);
+        counter++;
+
+        await ns.sleep(5000);
     }
 }
 
@@ -34,17 +30,27 @@ export async function makeHackedServersPristine(NS, hackedServers, agentServers)
  * @param {Array<Server>[]} agentServers 
  * @param {Array<Server>[]} pristineServers 
  */
-function processServer(hackedServers, x, agentServers, pristineServers) {
-    var target = hackedServers[x];
-    var server = agentServers[x];
+function processServer(hackedServers, agentServers, pristineServers) {
+    for (var x = 0; x < hackedServers.length; x++) {
+        for (var y = 0; y < agentServers.length; y++) {
 
-    if (!pristineServers.includes(server)) {
-        if (!areServerScriptsRunning(ns, server, target, "/HackScripts/Weaken.js","/HackScripts/Grow.js", "/HackScripts/Hack.js", "/HackScripts/Share.js")) {
-            var totalThreads = getMaxThreads(ns, server, ns.getScriptRam("/SchedulerScripts/Weaken.js"));
+        }
+    }
 
-            if (weakenAndGrowServer(server.hostname, target.hostname, totalThreads, .9, .9)) {
-                pristineServers.push(server);
+    var hackedServerIndex = 0;
+    var AgentServerIndex = 0;
+
+    while (hackedServerIndex < hackedServers.length) {
+        var totalThreads = getMaxThreads(ns, agentServers[AgentServerIndex], ns.getScriptRam("/HackScripts/Weaken.js"));
+        if (!pristineServers.includes(hackedServers[hackedServerIndex])) {
+            if (weakenAndGrowServer(agentServers[AgentServerIndex].hostname, hackedServers[hackedServerIndex].hostname, totalThreads, .9, .9)) {
+                pristineServers.push(hackedServers[hackedServerIndex]);
             }
+            hackedServerIndex++;
+            if (totalThreads == 0) {
+                AgentServerIndex++;
+            }
+
         }
     }
 }
@@ -64,7 +70,7 @@ function weakenAndGrowServer(serverName, targetServer, totalActionsAvailable, se
     var percentMoneyAvailable = currentMoney / maxMoney;
 
     var minSecurity = ns.getServerMinSecurityLevel(targetServer);
-    var currentSecurity = ns.getServerSecurityLevel(targetServer); S
+    var currentSecurity = ns.getServerSecurityLevel(targetServer);
     var securityRatio = currentSecurity / minSecurity;
 
     var isBelowSecurityThreshold = securityRatio >= (minSecurity * securityThreshold);

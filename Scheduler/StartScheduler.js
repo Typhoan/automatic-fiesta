@@ -13,6 +13,10 @@ export async function main(ns) {
 
     await makeHackedServersPristine(ns, hackedServers, agentServers);
 
+    for(let x =0; x< agentServers.length; x++) {
+        await CopyScriptsToServer(ns, agentServers[x].hostname);
+    }
+
     // find the most profitable hacked servers, and find agent server with most available ram. 
     let mostProfitableServers = await getMostProfitableServers(ns, hackedServers);
 
@@ -27,11 +31,18 @@ export async function main(ns) {
 
     while(true){
 
-        for (let i = 0; i < numberServersToHack; i++) {
+        for (let i = 0; i < 1; i++) {
             LastScheduledTime[i] = await schedule(ns, mostProfitableServers[i], agentServers[i], LastScheduledTime[i]);
         }
 
-        ns.sleep(4000);
+        await ns.sleep(4000);
     }
 
+}
+
+async function CopyScriptsToServer(ns, serverName) {
+	await ns.scp("/SchedulerScripts/Hack.js", "home", serverName);
+	await ns.scp("/SchedulerScripts/Grow.js", "home", serverName);
+	await ns.scp("/SchedulerScripts/Weaken.js", "home", serverName);
+	ns.print("Successfully copied files");
 }
